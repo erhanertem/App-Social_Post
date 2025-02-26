@@ -20,7 +20,7 @@
 <img src="https://raw.githubusercontent.com/erhanertem/erhanertem/main/icons/learning.gif" width="30px"/><strong>In
 addition to the project cirriculum:</strong>
 
-- Change crezte-react-app project to vite-react project
+- Change create-react-app project to vite-react project
 
 &emsp;
 
