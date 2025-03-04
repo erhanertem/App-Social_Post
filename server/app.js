@@ -1,5 +1,6 @@
 const path = require('path');
 const express = require('express');
+const mongoose = require('mongoose');
 
 const dotenv = require('dotenv');
 // Load appropriate .env file based on NODE_ENV
@@ -43,6 +44,14 @@ app.use('/feed', feedRoutes); // Prefixes the endpoint URL with /feed
 const PORT = process.env.PORT || 3000;
 const DB_HOST = process.env.DB_HOST || 'localhost';
 const NODE_ENV = process.env.NODE_ENV || 'development';
-app.listen(PORT, DB_HOST, () => {
-  console.log(`Listening on port ${PORT}, running on DB_HOST:${DB_HOST} in ${NODE_ENV} mode`);
-});
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_USER_PASS}@${process.env.MONGO_CLUSTER_NAME}.qqml4.mongodb.net/${process.env.MONGO_COLLECTION_NAME}?retryWrites=true&w=majority`;
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    console.log('Connected to MongoDB');
+    app.listen(PORT, DB_HOST, () => {
+      console.log(`Listening on port ${PORT}, running on DB_HOST:${DB_HOST} in ${NODE_ENV} mode`);
+    });
+  })
+  .catch((err) => console.error('Connection failed', err));
