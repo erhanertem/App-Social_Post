@@ -14,8 +14,14 @@ const app = express();
 
 // // Text type only form submission parser
 // app.use(express.urlencoded({ extended: false }));
-// Req Body Parser - application/json
+
+// Middleware to parse JSON payloads (req.body parser - application/json)
 app.use(express.json());
+
+// Middleware to serve static files
+// NOTE: Order of Execution: Middleware functions are executed sequentially. If express.static() is placed before express.json(), it will handle requests for static files first. This can lead to unexpected behavior if a request is intended to be processed by express.json() but is intercepted by express.static().
+// Performance: Placing express.static() after express.json() ensures that only requests that are not handled by other middleware (like express.json()) will be served as static files. This can improve performance by reducing unnecessary file system access.
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // 1️⃣ Handle CORS for normal requests - Allow communication between server and client domains
 app.use((req, res, next) => {
@@ -39,6 +45,13 @@ app.options('*', (req, res) => {
 
 // App Routes
 app.use('/feed', feedRoutes); // Prefixes the endpoint URL with /feed
+
+// Error Handling Middleware
+app.use((error, req, res, next) => {
+  console.error(error.stack);
+  const { statusCode = 500, message = 'Something went wrong!' } = error;
+  res.status(statusCode).json({ message });
+});
 
 // Start the server
 const PORT = process.env.PORT || 3000;

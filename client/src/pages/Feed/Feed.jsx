@@ -118,7 +118,6 @@ class Feed extends Component {
       body: JSON.stringify({ title: postData.title, content: postData.content }),
     })
       .then((res) => {
-        console.log('1️⃣', res);
         if (res.status !== 200 && res.status !== 201) {
           throw new Error('Creating or editing a post failed!');
         }
@@ -126,7 +125,6 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
-        console.log('2️⃣', resData);
         const post = {
           _id: resData.post._id,
           title: resData.post.title,
