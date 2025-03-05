@@ -3,20 +3,60 @@ const { validationResult } = require('express-validator');
 const Post = require('../models/post');
 
 exports.getPosts = (req, res, next) => {
-  res.status(200).json({
-    posts: [
-      {
-        _id: '1',
-        title: 'First Post',
-        content: 'This is the first post',
-        imageUrl: 'images/duck.jpg',
-        creator: {
-          name: 'Erhan Ertem',
-        },
-        createdAt: new Date(),
-      },
-    ],
-  });
+  Post.find()
+    .then((posts) => {
+      res.status(200).json({
+        message: 'Fetched posts successfully',
+        posts,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+
+  // DUMMY RESPONSE
+  // res.status(200).json({
+  //   posts: [
+  //     {
+  //       _id: '1',
+  //       title: 'First Post',
+  //       content: 'This is the first post',
+  //       imageUrl: 'images/duck.jpg',
+  //       creator: {
+  //         name: 'Erhan Ertem',
+  //       },
+  //       createdAt: new Date(),
+  //     },
+  //   ],
+  // });
+};
+
+exports.getPost = (req, res, next) => {
+  // Acquire params value
+  const postId = req.params.postId;
+  // Find the post in the database using the acquired id
+  Post.findById(postId)
+    .then((post) => {
+      // GUARD CLAUSE - Unavailable resource
+      if (!post) {
+        const error = new Error('Could not find post');
+        error.statusCode = 404;
+        throw error;
+      }
+      // Return response
+      res.status(200).json({ message: 'Post fetched', post });
+    })
+    .catch((err) => {
+      console.log(err);
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };
 
 exports.postPost = (req, res, next) => {
@@ -31,7 +71,7 @@ exports.postPost = (req, res, next) => {
 
   const { title, content } = req.body;
 
-  const post = new Post({ title, imageUrl: 'images/headphone.jpg', content, creator: { name: 'Erhan ERTEM' } });
+  const post = new Post({ title, imageUrl: 'images/headphone.jpeg', content, creator: { name: 'Erhan ERTEM' } });
   post
     .save()
     .then((result) => {
