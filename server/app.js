@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -17,13 +18,23 @@ const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(
       null, // Errror
-      'images' // Folder name
+      'images/' // Folder name
     );
   },
   filename: (req, file, cb) => {
-    cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname);
+    const uniqueSuffix = file.fieldname + '-' + new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname;
+    const sanitizedFilename = uniqueSuffix.replace(/\s+/g, '_'); // Replace spaces with underscore
+    cb(null, sanitizedFilename);
   },
 });
+const makeFoldersIfDoesNotExist = (folders) => {
+  folders.forEach((folder) => {
+    if (!fs.existsSync(folder)) {
+      fs.mkdirSync(folder); // Create the folder if it doesn't exist.
+    }
+  });
+};
+makeFoldersIfDoesNotExist(['images']);
 const fileFilter = (req, file, cb) => {
   const fileTypes = ['image/png', 'image/jpeg', 'image/jpg'];
   if (fileTypes.includes(file.mimetype)) {
@@ -41,7 +52,7 @@ const fileFilter = (req, file, cb) => {
 app.use(express.json());
 
 // Multer middleware to handle image uploads
-app.use(multer({ stroage: fileStorage, fileFilter }).single('image'));
+app.use(multer({ storage: fileStorage, fileFilter }).single('image'));
 // Middleware to serve static files
 // NOTE: Order of Execution: Middleware functions are executed sequentially. If express.static() is placed before express.json(), it will handle requests for static files first. This can lead to unexpected behavior if a request is intended to be processed by express.json() but is intercepted by express.static().
 // Performance: Placing express.static() after express.json() ensures that only requests that are not handled by other middleware (like express.json()) will be served as static files. This can improve performance by reducing unnecessary file system access.
