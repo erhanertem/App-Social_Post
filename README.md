@@ -11,7 +11,11 @@
 
 - **Create backend template for the React CSR project**
 
-  - ....
+  - Create a Mongoose Schema and Model for post related CRUD operations.
+  - Handling multipart form data submission on the backend.
+  - Form data validation
+    - Client-side validation (UX purposes)
+    - Server-side validation
 
   </details>
 
@@ -21,6 +25,10 @@
 addition to the project cirriculum:</strong>
 
 - Change create-react-app project to vite-react project
+- Upgrade to reactrouter v6+
+- File Storing
+  - Check for folder existance for multer storage.
+  - Sanitize file names before storing in server.
 
 &emsp;
 

@@ -59,9 +59,55 @@ exports.getPost = (req, res, next) => {
     });
 };
 
-exports.postPost = (req, res, next) => {
-  const errors = validationResult(req); // Extract any errors within the request object
+exports.updatePost = (req, res, next) => {
   // GUARD CLAUSE - Handle validation errors
+  const errors = validationResult(req); // Extract any errors within the request object
+  if (!errors.isEmpty()) {
+    const error = new Error('Validation failed, entered data is incorrect');
+    error.statusCode = 422;
+    throw error;
+  }
+
+  const postId = req.params.postId;
+  const { title, content, image: imageUrl } = req.body;
+  // GUARD CLAUSE - Handle none-existing image
+  if (!imageUrl) {
+    const error = new Error('No file picked');
+    error.statusCode = 422;
+    throw error;
+  }
+  // If there is a multer image, consider this as a replacement image
+  if (req.file) {
+    imageUrl = req.file.path.replace('\\', '/');
+  }
+  // Find the post in the database using the acquired id
+  Post.findById(postId) // May return null or undefined so in absense of a post, we need to handle this in the then block
+    .then((post) => {
+      // GUARD CLAUSE - Unavailable resource
+      if (!post) {
+        const error = new Error('Could not find post');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      post.title = title;
+      post.content = content;
+      post.imageUrl = imageUrl;
+
+      return post.save();
+    })
+    .then((result) => res.status(200).json({ message: 'Post updated!', post: result })) // No new content created so status is 200. In postPOST, it was 201.
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+exports.postPost = (req, res, next) => {
+  // GUARD CLAUSE - Handle validation errors
+  const errors = validationResult(req); // Extract any errors within the request object
   if (!errors.isEmpty()) {
     const error = new Error('Validation failed, entered data is incorrect');
     error.statusCode = 422;
