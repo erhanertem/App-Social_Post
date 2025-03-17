@@ -25,10 +25,11 @@
 addition to the project cirriculum:</strong>
 
 - Change create-react-app project to vite-react project
-- Upgrade to reactrouter v6+
-- File Storing
+- Upgrade frontend to reactrouter v6+
+- Server-side File Storing
   - Check for folder existance for multer storage.
   - Sanitize file names before storing in server.
+- Server-side Modularized Multer Setup to respond different scenarios
 
 &emsp;
 

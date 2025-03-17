@@ -1,8 +1,6 @@
 const path = require('path');
-const fs = require('fs');
 const express = require('express');
 const mongoose = require('mongoose');
-const multer = require('multer');
 
 const dotenv = require('dotenv');
 // Load appropriate .env file based on NODE_ENV
@@ -10,53 +8,58 @@ const envFile = `.env.${process.env.NODE_ENV || 'development'}`;
 dotenv.config({ path: path.resolve(__dirname, envFile) });
 
 const feedRoutes = require('./routes/feed');
+const makeFolderIfDoesNotExist = require('./util/makeFolder');
+
+// Initialize Uploads Directory
+makeFolderIfDoesNotExist('uploads');
 
 // Init Express App
 const app = express();
+// const fileStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(
+//       null, // Errror
+//       'images/' // Folder name
+//     );
+//   },
+//   filename: (req, file, cb) => {
+//     const uniqueSuffix = file.fieldname + '-' + new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname;
+//     const sanitizedFilename = uniqueSuffix.replace(/\s+/g, '_'); // Replace spaces with underscore
+//     cb(null, sanitizedFilename);
+//   },
+// });
 
-const fileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(
-      null, // Errror
-      'images/' // Folder name
-    );
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = file.fieldname + '-' + new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname;
-    const sanitizedFilename = uniqueSuffix.replace(/\s+/g, '_'); // Replace spaces with underscore
-    cb(null, sanitizedFilename);
-  },
-});
-const makeFoldersIfDoesNotExist = (folders) => {
-  folders.forEach((folder) => {
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder); // Create the folder if it doesn't exist.
-    }
-  });
-};
-makeFoldersIfDoesNotExist(['images']);
-const fileFilter = (req, file, cb) => {
-  const fileTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-  if (fileTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    const allowedExtensions = fileTypes.map((type) => type.split('/')[1]).join(', ');
-    cb(new Error(`Only image files with ${allowedExtensions} extensions are allowed`), false);
-  }
-};
+// const fileFilter = (req, file, cb) => {
+//   const fileTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+//   if (fileTypes.includes(file.mimetype)) {
+//     cb(null, true);
+//   } else {
+//     const allowedExtensions = fileTypes.map((type) => type.split('/')[1]).join(', ');
+//     cb(new Error(`Only image files with ${allowedExtensions} extensions are allowed`), false);
+//   }
+// };
 
 // // Text type only form submission parser
 // app.use(express.urlencoded({ extended: false }));
 
-// Middleware to parse JSON payloads (req.body parser - application/json)
-app.use(express.json());
+// Middleware to parse incoming data
+app.use(express.json()); // Parses JSON data (application/json)
+app.use(express.urlencoded({ extended: true })); // Parse text only form-data (application/x-www-form-urlencoded)
 
-// Multer middleware to handle image uploads
-app.use(multer({ storage: fileStorage, fileFilter }).single('image'));
+// // Multer middleware to handle image uploads
+// app.use(multer({ storage: fileStorage, fileFilter }).single('image'));
 // Middleware to serve static files
-// NOTE: Order of Execution: Middleware functions are executed sequentially. If express.static() is placed before express.json(), it will handle requests for static files first. This can lead to unexpected behavior if a request is intended to be processed by express.json() but is intercepted by express.static().
+//**
+// NOTE:
+// Order of Execution: Middleware functions are executed sequentially. If express.static() is placed before express.json(), it will handle requests for static files first. This can lead to unexpected behavior if a request is intended to be processed by express.json() but is intercepted by express.static().
 // Performance: Placing express.static() after express.json() ensures that only requests that are not handled by other middleware (like express.json()) will be served as static files. This can improve performance by reducing unnecessary file system access.
-app.use('/images', express.static(path.join(__dirname, 'images')));
+//  */
+app.use(
+  '/uploads', // URL Filtering: Serve any URL with @root/uploads/....
+  express.static(
+    path.join(__dirname, 'uploads') //constructs the absolute path to the uploads directory,
+  )
+);
 
 // 1️⃣ Handle CORS for normal requests - Allow communication between server and client domains
 app.use((req, res, next) => {
