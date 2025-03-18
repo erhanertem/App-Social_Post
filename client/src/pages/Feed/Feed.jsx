@@ -21,6 +21,9 @@ class Feed extends Component {
     editLoading: false,
   };
 
+  // ✅ Define it once as a class field
+  itemsPerPage = Number(import.meta.env.VITE_ITEMS_PER_PAGE) || 2;
+
   componentDidMount() {
     fetch('URL')
       .then((res) => {
@@ -148,7 +151,7 @@ class Feed extends Component {
           if (prevState.editPost) {
             const postIndex = prevState.posts.findIndex((p) => p._id === prevState.editPost._id);
             updatedPosts[postIndex] = post;
-          } else if (prevState.posts.length < 2) {
+          } else if (prevState.posts.length < this.itemsPerPage) {
             updatedPosts = prevState.posts.concat(post);
           }
           return {
@@ -247,7 +250,7 @@ class Feed extends Component {
             <Paginator
               onPrevious={this.loadPosts.bind(this, 'previous')}
               onNext={this.loadPosts.bind(this, 'next')}
-              lastPage={Math.ceil(this.state.totalPosts / 2)}
+              lastPage={Math.ceil(this.state.totalPosts / this.itemsPerPage)}
               currentPage={this.state.postPage}>
               {this.state.posts.map((post) => (
                 <Post

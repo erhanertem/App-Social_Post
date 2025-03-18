@@ -11,7 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
-images
+.env*
+
 
 # Editor directories and files
 .vscode/*
@@ -23,6 +24,11 @@ images
 *.njsproj
 *.sln
 *.sw?
+
+desktop.ini
+code.js
+images
+**/invoices/*
 about.txt
 
 # TEMP FILE

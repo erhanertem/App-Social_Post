@@ -26,6 +26,7 @@ addition to the project cirriculum:</strong>
 
 - Change create-react-app project to vite-react project
 - Upgrade frontend to reactrouter v6+
+- Create dotenv for global access to static variables for the frontend
 - Server-side File Storing
   - Check for folder existance for multer storage.
   - Sanitize file names before storing in server.
