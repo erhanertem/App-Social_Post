@@ -5,11 +5,22 @@ const clearImage = require('../util/clearImage');
 const Post = require('../models/post');
 
 exports.getPosts = (req, res, next) => {
+  const currentPage = req.query.page || 1; // Defaults to 1 if query param is undefined
+  const perPage = process.env.VITE_PAGINATE_ITEMS_PER_PAGE || 5;
+  let totalItems;
   Post.find()
+    .countDocuments()
+    .then((count) => {
+      totalItems = count;
+      return Post.find()
+        .skip((currentPage - 1) * perPage) // Skips previous pages of items
+        .limit(perPage); // grap the set of next items per page
+    })
     .then((posts) => {
       res.status(200).json({
         message: 'Fetched posts successfully',
         posts,
+        totalItems,
       });
     })
     .catch((err) => {

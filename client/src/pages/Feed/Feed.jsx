@@ -22,7 +22,7 @@ class Feed extends Component {
   };
 
   // ✅ Define it once as a class field
-  itemsPerPage = Number(import.meta.env.VITE_ITEMS_PER_PAGE) || 2;
+  itemsPerPage = Number((import.meta.env.VITE_PAGINATE_ITEMS_PER_PAGE = 2)) || 5;
 
   componentDidMount() {
     fetch('URL')
@@ -53,7 +53,7 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch('http://localhost:8080/feed/posts')
+    fetch('http://localhost:8080/feed/posts?page=' + page)
       .then((res) => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch posts.');
