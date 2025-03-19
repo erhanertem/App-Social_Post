@@ -7,6 +7,7 @@ const validationHandler = (req, res, next) => {
   if (!errors.isEmpty()) {
     const error = new Error('Validation failed, entered data is incorrect');
     error.statusCode = 422;
+    error.data = errors.array();
     throw error; // ---> shoots to next catch error handler
     // // return res.status(422).json({ message: 'Validation failed, entered data is incorrect', errors: errors.array() }); // errors.array() belongs to express-validator and returns an array of reported errors
   }

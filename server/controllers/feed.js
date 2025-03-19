@@ -1,5 +1,3 @@
-const path = require('path');
-
 const extractRelativePath = require('../util/extractRelativePath');
 const clearImage = require('../util/clearImage');
 const Post = require('../models/post');

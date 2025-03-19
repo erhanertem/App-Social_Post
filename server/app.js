@@ -8,6 +8,7 @@ const envFile = `.env.${process.env.NODE_ENV || 'development'}`;
 dotenv.config({ path: path.resolve(__dirname, envFile) });
 
 const feedRoutes = require('./routes/feed');
+const authRoutes = require('./routes/auth');
 const makeFolderIfDoesNotExist = require('./util/makeFolder');
 
 // Initialize Uploads Directory
@@ -83,12 +84,13 @@ app.options('*', (req, res) => {
 
 // App Routes
 app.use('/feed', feedRoutes); // Prefixes the endpoint URL with /feed
+app.use('/auth', authRoutes); // Prefixes the endpoint URL with /auth
 
-// Error Handling Middleware
+// -> Error Handling Middleware
 app.use((error, req, res, next) => {
   console.error(error.stack);
-  const { statusCode = 500, message = 'Something went wrong!' } = error;
-  res.status(statusCode).json({ message });
+  const { statusCode = 500, message = 'Something went wrong!', data } = error;
+  res.status(statusCode).json({ message, data });
 });
 
 // Start the server
